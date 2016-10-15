@@ -56,8 +56,7 @@ void MainWindow::setFrequency(int frequency)
 
 void MainWindow::setValve1(int state)
 {
-    TrumpetGenerator *trumpet = new TrumpetGenerator();
-    //trumpet->generateTrumpet(440, 2);
+
 }
 
 void MainWindow::setValve2(int state)
