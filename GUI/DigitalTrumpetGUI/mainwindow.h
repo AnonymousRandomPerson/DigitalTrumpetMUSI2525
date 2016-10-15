@@ -19,6 +19,9 @@ public:
 
 private slots:
     void setFrequency(int frequency);
+    void setValve1(int frequency);
+    void setValve2(int frequency);
+    void setValve3(int frequency);
 
 private:
     Ui::MainWindow *ui;

@@ -14,8 +14,10 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp\
+        ../../C++/TrumpetGenerator.cpp
         #../../C++/Dummy.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h\
+         ../../C++/TrumpetGenerator.h
 
 FORMS    += mainwindow.ui

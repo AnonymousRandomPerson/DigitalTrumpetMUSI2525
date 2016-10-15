@@ -4,6 +4,8 @@
 #include <QCheckBox>
 #include <iostream>
 
+#include "../../C++/TrumpetGenerator.h"
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -23,12 +25,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QCheckBox *valve1 = new QCheckBox("Valve 1", this);
     valve1->setGeometry(valveMiddleX - valveSeparation, valveY, valveLength, valveHeight);
+    QObject::connect(valve1, SIGNAL(stateChanged(int)), this, SLOT(setValve1(int)));
 
     QCheckBox *valve2 = new QCheckBox("Valve 2", this);
     valve2->setGeometry(valveMiddleX, valveY, valveLength, valveHeight);
+    QObject::connect(valve2, SIGNAL(stateChanged(int)), this, SLOT(setValve2(int)));
 
     QCheckBox *valve3 = new QCheckBox("Valve 3", this);
     valve3->setGeometry(valveMiddleX + valveSeparation, valveY, valveLength, valveHeight);
+    QObject::connect(valve3, SIGNAL(stateChanged(int)), this, SLOT(setValve3(int)));
 
     int sliderHeight = 100;
     int sliderLength = 30;
@@ -41,13 +46,28 @@ MainWindow::MainWindow(QWidget *parent) :
     vibration->setRange(0, 1000);
     vibrationLabel = new QLabel(FREQUENCY_TEXT + "0Hz", this);
     vibrationLabel->setGeometry(sliderX + sliderLength, sliderY + labelHeight, 120, labelHeight);
-
     QObject::connect(vibration, SIGNAL(valueChanged(int)), this, SLOT(setFrequency(int)));
 }
 
 void MainWindow::setFrequency(int frequency)
 {
     vibrationLabel->setText(FREQUENCY_TEXT + QString::number(frequency) + "Hz");
+}
+
+void MainWindow::setValve1(int state)
+{
+    TrumpetGenerator *trumpet = new TrumpetGenerator();
+    //trumpet->generateTrumpet(440, 2);
+}
+
+void MainWindow::setValve2(int state)
+{
+
+}
+
+void MainWindow::setValve3(int state)
+{
+
 }
 
 MainWindow::~MainWindow()

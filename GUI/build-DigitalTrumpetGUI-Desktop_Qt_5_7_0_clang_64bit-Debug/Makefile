@@ -50,10 +50,10 @@ OBJECTS_DIR   = ./
 
 SOURCES       = ../DigitalTrumpetGUI/main.cpp \
 		../DigitalTrumpetGUI/mainwindow.cpp \
-		../../C++/Dummy.cpp moc_mainwindow.cpp
+		../../C++/TrumpetGenerator.cpp moc_mainwindow.cpp
 OBJECTS       = main.o \
 		mainwindow.o \
-		Dummy.o \
+		TrumpetGenerator.o \
 		moc_mainwindow.o
 DIST          = /Users/chenghanngan/Library/Qt/5.7/clang_64/mkspecs/features/spec_pre.prf \
 		/Users/chenghanngan/Library/Qt/5.7/clang_64/mkspecs/qdevice.pri \
@@ -210,9 +210,10 @@ DIST          = /Users/chenghanngan/Library/Qt/5.7/clang_64/mkspecs/features/spe
 		/Users/chenghanngan/Library/Qt/5.7/clang_64/mkspecs/features/exceptions.prf \
 		/Users/chenghanngan/Library/Qt/5.7/clang_64/mkspecs/features/yacc.prf \
 		/Users/chenghanngan/Library/Qt/5.7/clang_64/mkspecs/features/lex.prf \
-		../DigitalTrumpetGUI/DigitalTrumpetGUI.pro ../DigitalTrumpetGUI/mainwindow.h ../DigitalTrumpetGUI/main.cpp \
+		../DigitalTrumpetGUI/DigitalTrumpetGUI.pro ../DigitalTrumpetGUI/mainwindow.h \
+		../../C++/TrumpetGenerator.h ../DigitalTrumpetGUI/main.cpp \
 		../DigitalTrumpetGUI/mainwindow.cpp \
-		../../C++/Dummy.cpp
+		../../C++/TrumpetGenerator.cpp
 QMAKE_TARGET  = DigitalTrumpetGUI
 DESTDIR       = 
 TARGET        = DigitalTrumpetGUI.app/Contents/MacOS/DigitalTrumpetGUI
@@ -573,8 +574,8 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents ../DigitalTrumpetGUI/mainwindow.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../DigitalTrumpetGUI/main.cpp ../DigitalTrumpetGUI/mainwindow.cpp ../../C++/Dummy.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../DigitalTrumpetGUI/mainwindow.h ../../C++/TrumpetGenerator.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../DigitalTrumpetGUI/main.cpp ../DigitalTrumpetGUI/mainwindow.cpp ../../C++/TrumpetGenerator.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents ../DigitalTrumpetGUI/mainwindow.ui $(DISTDIR)/
 
 
@@ -660,8 +661,8 @@ mainwindow.o: ../DigitalTrumpetGUI/mainwindow.cpp ../DigitalTrumpetGUI/mainwindo
 		/Users/chenghanngan/Library/Qt/5.7/clang_64/lib/QtWidgets.framework/Headers/qcheckbox.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwindow.o ../DigitalTrumpetGUI/mainwindow.cpp
 
-Dummy.o: ../../C++/Dummy.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Dummy.o ../../C++/Dummy.cpp
+TrumpetGenerator.o: ../../C++/TrumpetGenerator.cpp ../../C++/TrumpetGenerator.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o TrumpetGenerator.o ../../C++/TrumpetGenerator.cpp
 
 moc_mainwindow.o: moc_mainwindow.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_mainwindow.o moc_mainwindow.cpp
