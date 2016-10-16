@@ -2,9 +2,8 @@
 #include "ui_mainwindow.h"
 #include <QSlider>
 #include <QCheckBox>
-#include <iostream>
 
-#include "../../C++/TrumpetGenerator.h"
+#include "audioplayer.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -47,6 +46,14 @@ MainWindow::MainWindow(QWidget *parent) :
     vibrationLabel = new QLabel(FREQUENCY_TEXT + "0Hz", this);
     vibrationLabel->setGeometry(sliderX + sliderLength, sliderY + labelHeight, 120, labelHeight);
     QObject::connect(vibration, SIGNAL(valueChanged(int)), this, SLOT(setFrequency(int)));
+
+    audioPlayer = new AudioPlayer();
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+    delete audioPlayer;
 }
 
 void MainWindow::setFrequency(int frequency)
@@ -56,20 +63,15 @@ void MainWindow::setFrequency(int frequency)
 
 void MainWindow::setValve1(int state)
 {
-
+    audioPlayer->start();
 }
 
 void MainWindow::setValve2(int state)
 {
-
+    audioPlayer->start();
 }
 
 void MainWindow::setValve3(int state)
 {
-
-}
-
-MainWindow::~MainWindow()
-{
-    delete ui;
+    audioPlayer->start();
 }

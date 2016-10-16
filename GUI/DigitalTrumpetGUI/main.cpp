@@ -1,13 +1,9 @@
 #include "mainwindow.h"
-#include <QApplication>
 
-#include "../../C++/TrumpetGenerator.h"
+#include <QApplication>
 
 int main(int argc, char *argv[])
 {
-    TrumpetGenerator *trumpet = new TrumpetGenerator();
-    trumpet->generateTrumpet(440, 2);
-
     QApplication a(argc, argv);
     MainWindow w;
 

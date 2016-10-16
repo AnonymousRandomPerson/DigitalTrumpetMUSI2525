@@ -29,3 +29,5 @@
 
 *.DS_Store
 *.wav
+
+GUI/build-*

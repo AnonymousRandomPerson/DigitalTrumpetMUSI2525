@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui\
+            multimedia multimediawidgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -14,10 +15,14 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp\
-        ../../C++/TrumpetGenerator.cpp
+        ../../C++/TrumpetGenerator.cpp \
+        audioplayer.cpp
         #../../C++/Dummy.cpp
 
 HEADERS  += mainwindow.h\
-         ../../C++/TrumpetGenerator.h
+         ../../C++/TrumpetGenerator.h \
+         audioplayer.h
 
 FORMS    += mainwindow.ui
+
+INCLUDEPATH += ../../C++

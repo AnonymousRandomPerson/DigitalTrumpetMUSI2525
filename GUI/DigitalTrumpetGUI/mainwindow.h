@@ -5,6 +5,8 @@
 #include <QLabel>
 #include <QString>
 
+#include "audioplayer.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -26,6 +28,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QLabel *vibrationLabel;
+    AudioPlayer *audioPlayer;
 
     const QString FREQUENCY_TEXT = "Frequency: ";
 };

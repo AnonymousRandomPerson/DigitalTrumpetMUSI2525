@@ -2,11 +2,6 @@
 #include <math.h>
 #include <iostream>
 
-//int main()
-//{
-//    TrumpetGenerator *trumpet = new TrumpetGenerator();
-//}
-
 TrumpetGenerator::TrumpetGenerator()
 {
     attackCurve = makeLine(0.2, 1, 0.075);
@@ -14,97 +9,94 @@ TrumpetGenerator::TrumpetGenerator()
     releaseCurve = makeLine(0.8, 0, 0.2);
 }
 
+TrumpetGenerator::~TrumpetGenerator()
+{
+
+}
+
 std::vector<double> TrumpetGenerator::generateTrumpet(double frequency, double seconds)
 {
     int numInitialSamples = seconds * SAMPLE_RATE + 1;
     int numSamples = numInitialSamples * 2;
+    unsigned long i;
     std::vector<double> trumpetSound(numSamples);
 
-    for (unsigned long i = 0; i < envelope.size(); i++)
+    for (i = 0; i < envelope.size(); i++)
     {
-        addSinusoidal(0, seconds, frequency * i, envelope[i], trumpetSound);
+        addSinusoidal(0, seconds, frequency * (i + 1), envelope[i], trumpetSound);
     }
 
     // FM.
     fmmod(trumpetSound, 0.01, frequency);
 
     // Initial attack.
-    for (unsigned long i = 0; i < attackCurve.size(); i++)
+    for (i = 0; i < attackCurve.size(); i++)
     {
         trumpetSound[i] *= attackCurve[i];
     }
 
     // Decay.
-    for (unsigned long i = 0; i < decayCurve.size(); i++)
+    for (i = 0; i < decayCurve.size(); i++)
     {
         trumpetSound[attackCurve.size() + i] *= decayCurve[i];
     }
 
     // Sustain.
     int sustainLength = 0;
-    for (unsigned long i = attackCurve.size() + decayCurve.size(); i < numInitialSamples - releaseCurve.size(); i++)
+    for (i = attackCurve.size() + decayCurve.size(); i < numInitialSamples - releaseCurve.size(); i++)
     {
         trumpetSound[i] *= 0.8;
         sustainLength++;
     }
 
     // Release.
-    for (unsigned long i = 0; i < releaseCurve.size(); i++)
+    for (i = 0; i < releaseCurve.size(); i++)
     {
         trumpetSound[attackCurve.size() + decayCurve.size() + sustainLength + i] *= releaseCurve[i];
     }
 
     // Reverb.
     std::vector<double> partTrumpet(numInitialSamples);
-    for (int i = 0; i < 40; i++) {
-        std::vector<double> partTrumpetScaled(numInitialSamples);
-        for (int j = 0; j < numInitialSamples; j++) {
-            partTrumpetScaled[j] = partTrumpet[j] / (i * 1);
+    std::vector<double> partTrumpetScaled(numInitialSamples);
+    int j;
+    for (i = 0; i < 40; i++) {
+        for (j = 0; j < numInitialSamples; j++) {
+            partTrumpetScaled[j] = partTrumpet[j] / ((i + 1) * 1);
         }
         addWave(0 + i * 0.05, partTrumpetScaled, trumpetSound);
     }
 
-    for (int i = numInitialSamples; i < numSamples; i++)
+    for (i = numInitialSamples; i < numSamples; i++)
     {
         trumpetSound[i] = 0;
     }
 
     // LPF.
     double lowPassValue = 0;
-    for (int i = 0; i < numSamples; i++)
+    for (i = 0; i < numSamples; i++)
     {
         lowPassValue += (trumpetSound[i] - lowPassValue) / 2;
         trumpetSound[i] = lowPassValue;
     }
 
-    double maxAmplitude = 0;
-    for (int i = 0; i < numSamples; i++)
-    {
-        maxAmplitude = fmax(maxAmplitude, fabs(trumpetSound[i]));
-    }
-
-    for (int i = 0; i < numSamples; i++)
-    {
-        trumpetSound[i] /= maxAmplitude;
-    }
-
     return trumpetSound;
 }
 
-void TrumpetGenerator::addSinusoidal(double startTime, double seconds, double frequency, double amplitude, std::vector<double> originalSound)
+void TrumpetGenerator::addSinusoidal(double startTime, double seconds, double frequency, double amplitude, std::vector<double> &originalSound)
 {
     std::vector<double> newWave = generateSinusoidal(amplitude, frequency, seconds);
     addWave(startTime, newWave, originalSound);
 }
 
-void TrumpetGenerator::addWave(double startTime, std::vector<double> newWave, std::vector<double> originalSound)
+void TrumpetGenerator::addWave(double startTime, std::vector<double> newWave, std::vector<double> &originalSound)
 {
     int startSamples = secondsToSamples(startTime);
     int numSamples = newWave.size();
 
     for (int i = 0; i < numSamples; i++)
     {
-        originalSound[i + startSamples] += newWave[i];
+        int originalIndex = i + startSamples;
+        originalSound[originalIndex] += newWave[i];
     }
 }
 
@@ -114,9 +106,16 @@ std::vector<double> TrumpetGenerator::generateSinusoidal(double amplitude, doubl
     int length = secondsToSamples(seconds);
     std::vector<double> x(length);
 
-    for (int i = 0; i < length; i++)
+    int i;
+    for (i = 0; i < length; i++)
     {
-        x[i] = amplitude * sin(i * 2 * M_PI * frequency);
+        x[i] = amplitude * sin((double)i / SAMPLE_RATE * 2 * M_PI * frequency);
+    }
+
+    double maxAmplitude = 0;
+    for (i = 0; i < length; i++)
+    {
+        maxAmplitude = fmax(maxAmplitude, fabs(x[i]));
     }
 
     return x;
@@ -140,14 +139,20 @@ std::vector<double> TrumpetGenerator::makeLine(double startY, double endY, doubl
 
     for (int i = 0; i < length; i++)
     {
-        y[i] = startY + (endY - startY) * (i / (double) SAMPLE_RATE) / seconds;
+        y[i] = startY + (endY - startY) * ((double)i / SAMPLE_RATE) / seconds;
     }
 
     return y;
 }
 
-void TrumpetGenerator::fmmod(std::vector<double> sound, double frequency, double freqDev)
+void TrumpetGenerator::fmmod(std::vector<double> &sound, double frequency, double freqDev)
 {
-    //std::vector<double> sinusoidal = generateSinusoidal(1, frequency, samplesToSeconds(sound.length));
+    double cumsum = 0;
+    for (int i = 0; i < sound.size(); i++)
+    {
+        cumsum += sound[i];
+        double newValue = 25 * cos(2 * M_PI * (frequency * ((double)i / SAMPLE_RATE) + freqDev * (cumsum / SAMPLE_RATE)));
+        sound[i] = newValue;
+    }
 }
 

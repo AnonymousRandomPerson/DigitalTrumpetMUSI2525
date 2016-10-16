@@ -46,9 +46,19 @@ function generateTrumpet()
         trumpetSound(i) = lowPassValue;
     end
     
-    trumpetSound = trumpetSound / max(trumpetSound);
+    trumpetSound = trumpetSound / max(abs(trumpetSound));
     x = linspace(0, 2.6, length(trumpetSound));
     plot(x, trumpetSound);
     sound(trumpetSound, sampleRate);
     audiowrite('FakeTrumpet.wav', trumpetSound, sampleRate);
+end
+
+function y = fmmod2(x,Fc,Fs,freqdev)
+    x = x(:);
+    tSize = ((size(x,1)-1)/Fs);
+    t = (0:1/Fs:tSize)';
+    t = t(:,ones(1,size(x,2)));
+
+    int_x = cumsum(x)/Fs;
+    y = cos(2*pi*Fc*t + 2*pi*freqdev*int_x)';
 end
