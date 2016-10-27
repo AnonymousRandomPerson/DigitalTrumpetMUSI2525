@@ -39,13 +39,6 @@ function generateTrumpet()
     
     trumpetSound(numInitialSamples + 1:numSamples) = 0;
     
-    % LPF.
-    lowPassValue = 0;
-    for i = 1 : 1 : length(trumpetSound)
-        lowPassValue = lowPassValue + (trumpetSound(i) - lowPassValue) / 2;
-        trumpetSound(i) = lowPassValue;
-    end
-    
     trumpetSound = trumpetSound / max(abs(trumpetSound));
     x = linspace(0, 2.6, length(trumpetSound));
     plot(x, trumpetSound);

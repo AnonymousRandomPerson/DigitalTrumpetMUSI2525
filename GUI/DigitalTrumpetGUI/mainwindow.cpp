@@ -5,6 +5,8 @@
 
 #include "audioplayer.h"
 
+#define ON(s) s != 0
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -58,20 +60,29 @@ MainWindow::~MainWindow()
 
 void MainWindow::setFrequency(int frequency)
 {
+    this->frequency = frequency;
     vibrationLabel->setText(FREQUENCY_TEXT + QString::number(frequency) + "Hz");
 }
 
 void MainWindow::setValve1(int state)
 {
-    audioPlayer->start();
+    valves[0] = ON(state);
+    playSound();
 }
 
 void MainWindow::setValve2(int state)
 {
-    audioPlayer->start();
+    valves[1] = ON(state);
+    playSound();
 }
 
 void MainWindow::setValve3(int state)
 {
-    audioPlayer->start();
+    valves[2] = ON(state);
+    playSound();
+}
+
+void MainWindow::playSound()
+{
+    audioPlayer->start(frequency, valves, 2);
 }

@@ -5,6 +5,8 @@
 #include <QLabel>
 #include <QString>
 
+#include <array>
+
 #include "audioplayer.h"
 
 namespace Ui {
@@ -29,8 +31,12 @@ private:
     Ui::MainWindow *ui;
     QLabel *vibrationLabel;
     AudioPlayer *audioPlayer;
+    std::array<bool, 3> valves = {false, false, false};
+    double frequency;
 
     const QString FREQUENCY_TEXT = "Frequency: ";
+
+    void playSound();
 };
 
 #endif // MAINWINDOW_H

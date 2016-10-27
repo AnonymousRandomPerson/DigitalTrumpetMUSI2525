@@ -1,7 +1,5 @@
 #include "audioplayer.h"
 
-#include "TrumpetGenerator.h"
-
 AudioPlayer::AudioPlayer()
 {
     _samplingRate = TrumpetGenerator::SAMPLE_RATE;
@@ -28,20 +26,25 @@ AudioPlayer::AudioPlayer()
     _IDWrittenSample = 0;
     _sizeNolBuffer = 0;
 
-    TrumpetGenerator *trumpet = new TrumpetGenerator();
-    sound = trumpet->generateTrumpet(440, seconds);
+    trumpet = new TrumpetGenerator();
     playbackIndex = 0;
-    delete trumpet;
 }
 
 AudioPlayer::~AudioPlayer()
 {
+    delete trumpet;
 }
 
-void AudioPlayer::start()
+void AudioPlayer::start(double frequency, double seconds)
 {
+    if (frequency <= 0 || seconds <= 0)
+    {
+        return;
+    }
+
     _audio->stop();
     //QObject::connect(_audio, SIGNAL(notify()), this, SLOT(slot_writeMoreData()));
+    sound = trumpet->generateTrumpet(frequency, seconds);
 
     playbackIndex = 0;
     _pAudioIOBuffer = _audio->start();
@@ -51,6 +54,10 @@ void AudioPlayer::start()
     _buffer = (signed char*) calloc(_sizeNolBuffer, sizeof(signed char));
 
     slot_writeMoreData();
+}
+
+void AudioPlayer::start(double frequency, std::array<bool, 3> valves, double seconds) {
+    start(trumpet->mapToFrequency(frequency, valves), seconds);
 }
 
 void AudioPlayer::slot_writeMoreData()
