@@ -2,6 +2,11 @@
 #include <math.h>
 #include <iostream>
 
+// Patterns for choosing which valve switch statement to use.
+enum Pattern : bool { pattern_a, pattern_b };
+// The current on/off status of the valves (1,2,3).
+enum ValveStatus { v000, v001, v010, v011, v100, v101, v110, v111 };
+
 TrumpetGenerator::TrumpetGenerator()
 {
     attackCurve = makeLine(0.2, 1, 0.075);
@@ -88,43 +93,59 @@ double TrumpetGenerator::mapToFrequency(double vibrationFrequency, std::array<bo
             bitwiseValve += 1 << (lastIndex - i);
         }
     }
-    if (vibrationFrequency < 261.63)
+    Pattern pattern;
+    double baseFrequency = 261.63; // C4
+
+    double noteMultiplier;
+    int octave = log2(vibrationFrequency / baseFrequency);
+    double octaveMultiplier = 1 << octave;
+    double octavePlace = vibrationFrequency / (baseFrequency * octaveMultiplier);
+    octave += 4;
+    if (octave < 4)
     {
         return 0;
     }
-    else if (vibrationFrequency < 392)
+    else if (octavePlace < 1.5)
+    {
+        pattern = pattern_a;
+    }
+    else
+    {
+        pattern = pattern_b;
+    }
+    if (octave >= 7)
+    {
+        // Cap at C7.
+        noteMultiplier = 1;
+        octaveMultiplier = 1 << 3;
+    }
+    else if (pattern == pattern_a)
     {
         switch(bitwiseValve)
         {
-        case 0: return 261.63; // C4, 000
-        case 7: return 277.18; // C#4, 111
-        case 5: return 293.66; // D4, 101
-        case 3: return 311.13; // Eb4, 011
-        case 6: return 329.63; // E4, 110
-        case 4: return 349.23; // F4, 100
-        case 2: return 369.99; // F#4, 010
+        case v000: noteMultiplier = 1; break; // C
+        case v111: noteMultiplier = 1.05943508; break; // C#
+        case v101: noteMultiplier = 1.122424798; break; // D
+        case v011: noteMultiplier = 1.189198486; break; // Eb
+        case v110: noteMultiplier = 1.259909032; break; // E
+        case v100: noteMultiplier = 1.334823988; break; // F
+        case v010: noteMultiplier = 1.414172687; break; // F#
         default: return 0;
         }
     }
-    else if (vibrationFrequency < 523.25)
+    else
     {
         switch(bitwiseValve)
         {
-        case 0: return 392; // G4, 000
-        case 3: return 415.3; // G#4, 011
-        case 6: return 440; // A4, 110
-        case 4: return 466.16; // Bb4, 100
-        case 2: return 493.88; // B4, 010
+        case v000: noteMultiplier = 1.498299125; break; // G
+        case v011: noteMultiplier = 1.58735619; break; // G#
+        case v110: noteMultiplier = 1.681764324; break; // A
+        case v100: noteMultiplier = 1.781752857; break; // Bb
+        case v010: noteMultiplier = 1.887704009; break; // B
         default: return 0;
         }
     }
-    else {
-        switch(bitwiseValve)
-        {
-        case 0: return 523.25; // C5, 000
-        default: return 0;
-        }
-    }
+    return baseFrequency * octaveMultiplier * noteMultiplier;
 }
 
 void TrumpetGenerator::addSinusoidal(double startTime, double seconds, double frequency, double amplitude, std::vector<double> &originalSound)

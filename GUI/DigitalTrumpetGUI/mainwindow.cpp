@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     int windowLength = 300;
-    int windowHeight = 200;
+    int windowHeight = 600;
 
     setFixedSize(windowLength, windowHeight);
 
@@ -36,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
     valve3->setGeometry(valveMiddleX + valveSeparation, valveY, valveLength, valveHeight);
     QObject::connect(valve3, SIGNAL(stateChanged(int)), this, SLOT(setValve3(int)));
 
-    int sliderHeight = 100;
+    int sliderHeight = 500;
     int sliderLength = 30;
     int sliderX = 10;
     int sliderY = (windowHeight - sliderHeight) / 2;
@@ -44,7 +44,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QSlider *vibration = new QSlider(this);
     vibration->setGeometry(sliderX, sliderY, sliderLength, sliderHeight);
-    vibration->setRange(0, 1000);
+    vibration->setRange(0, 2100);
     vibrationLabel = new QLabel(FREQUENCY_TEXT + "0Hz", this);
     vibrationLabel->setGeometry(sliderX + sliderLength, sliderY + labelHeight, 120, labelHeight);
     QObject::connect(vibration, SIGNAL(valueChanged(int)), this, SLOT(setFrequency(int)));
