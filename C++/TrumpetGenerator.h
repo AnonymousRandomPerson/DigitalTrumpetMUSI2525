@@ -11,7 +11,9 @@ public:
     ~TrumpetGenerator();
     // Generates a synthesized trumpet sound.
     std::vector<double> generateTrumpet(double frequency, double seconds);
-    double mapToFrequency(double vibrationFrequency, std::array<bool, 3> valves);
+    // Turns a vibration frequency and a valve configuration into a note frequency.
+    // Valve input is bitwise in the order 321.
+    double mapToFrequency(double vibrationFrequency, int bitwiseValve);
     static const int SAMPLE_RATE = 44100;
 
 private:

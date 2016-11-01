@@ -4,8 +4,8 @@
 
 // Patterns for choosing which valve switch statement to use.
 enum Pattern : bool { pattern_a, pattern_b };
-// The current on/off status of the valves (1,2,3).
-enum ValveStatus { v000, v001, v010, v011, v100, v101, v110, v111 };
+// The current on/off status of the valves 123.
+enum ValveStatus { v000, v100, v010, v110, v001, v101, v011, v111 };
 
 TrumpetGenerator::TrumpetGenerator()
 {
@@ -81,18 +81,8 @@ std::vector<double> TrumpetGenerator::generateTrumpet(double frequency, double s
     return trumpetSound;
 }
 
-double TrumpetGenerator::mapToFrequency(double vibrationFrequency, std::array<bool, 3> valves)
+double TrumpetGenerator::mapToFrequency(double vibrationFrequency, int bitwiseValve)
 {
-    int bitwiseValve = 0;
-    // Big-endian is easier to read in this context.
-    int lastIndex = valves.size() - 1;
-    for (int i = lastIndex; i >= 0; i--)
-    {
-        if (valves[i])
-        {
-            bitwiseValve += 1 << (lastIndex - i);
-        }
-    }
     Pattern pattern;
     double baseFrequency = 261.63; // C4
 

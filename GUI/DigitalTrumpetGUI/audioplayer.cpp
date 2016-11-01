@@ -57,7 +57,16 @@ void AudioPlayer::start(double frequency, double seconds)
 }
 
 void AudioPlayer::start(double frequency, std::array<bool, 3> valves, double seconds) {
-    start(trumpet->mapToFrequency(frequency, valves), seconds);
+    int lastIndex = valves.size() - 1;
+    int bitwiseValve = 0;
+    for (int i = 0; i <= lastIndex; i++)
+    {
+        if (valves[i])
+        {
+            bitwiseValve += 1 << i;
+        }
+    }
+    start(trumpet->mapToFrequency(frequency, bitwiseValve), seconds);
 }
 
 void AudioPlayer::slot_writeMoreData()
