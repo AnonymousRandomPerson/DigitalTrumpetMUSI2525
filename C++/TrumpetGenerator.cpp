@@ -9,9 +9,13 @@ enum ValveStatus { v000, v100, v010, v110, v001, v101, v011, v111 };
 
 TrumpetGenerator::TrumpetGenerator()
 {
-    attackCurve = makeLine(0.2, 1, 0.075);
-    decayCurve = makeLine(1, 0.8, 0.3);
+    attackDecayCurve = makeLine(0.2, 1, 0.075);
+    std::vector<double> decayCurve = makeLine(1, 0.8, 0.3);
+    insertVector(attackDecayCurve, decayCurve);
+
     releaseCurve = makeLine(0.8, 0, 0.2);
+
+    cumsum = 0;
 }
 
 TrumpetGenerator::~TrumpetGenerator()
@@ -19,65 +23,75 @@ TrumpetGenerator::~TrumpetGenerator()
 
 }
 
-std::vector<double> TrumpetGenerator::generateTrumpet(double frequency, double seconds)
+std::vector<double> TrumpetGenerator::generateTrumpet(double frequency, int sampleOffset, bool release)
 {
-    int numInitialSamples = seconds * SAMPLE_RATE + 1;
-    int numSamples = numInitialSamples * 2;
+    std::vector<double> trumpetSound = generateBaseTrumpet(frequency, sampleOffset, release);
+
+    // Reverb.
+//    std::vector<double> partTrumpet;
+//    int j;
+//    int sampleOffsetReverb = sampleOffset;
+//    for (int i = 0; i < 0; i++)
+//    {
+//        sampleOffsetReverb -= 1;
+//        if (sampleOffsetReverb < 0)
+//        {
+//            break;
+//        }
+//        partTrumpet = generateBaseTrumpet(frequency, sampleOffsetReverb, release);
+//        for (j = 0; j < partTrumpet.size(); j++)
+//        {
+//            partTrumpet[j] /= ((i + 1) * (i + 1));
+//        }
+//        addWave(i * 0.05, partTrumpet, trumpetSound);
+//    }
+
+    return trumpetSound;
+}
+
+// Used to generate a trumpet sound without reverb.
+std::vector<double> TrumpetGenerator::generateBaseTrumpet(double frequency, int sampleOffset, bool release)
+{
+    double seconds = (double) BLOCK_SIZE / SAMPLE_RATE;
+    int numSamples = BLOCK_SIZE;
     unsigned long i;
     std::vector<double> trumpetSound(numSamples);
 
     for (i = 0; i < envelope.size(); i++)
     {
-        addSinusoidal(0, seconds, frequency * (i + 1), envelope[i], trumpetSound);
+        addSinusoidal(0, seconds, frequency * (i + 1), envelope[i], trumpetSound, sampleOffset);
     }
 
     // FM.
-    fmmod(trumpetSound, 0.01, frequency);
+    fmmod(trumpetSound, 0.01, frequency, sampleOffset);
 
-    // Initial attack.
-    for (i = 0; i < attackCurve.size(); i++)
+    // ADSR
+    for (int i = 0; i < numSamples; i++)
     {
-        trumpetSound[i] *= attackCurve[i];
-    }
-
-    // Decay.
-    for (i = 0; i < decayCurve.size(); i++)
-    {
-        trumpetSound[attackCurve.size() + i] *= decayCurve[i];
-    }
-
-    // Sustain.
-    int sustainLength = 0;
-    for (i = attackCurve.size() + decayCurve.size(); i < numInitialSamples - releaseCurve.size(); i++)
-    {
-        trumpetSound[i] *= 0.8;
-        sustainLength++;
-    }
-
-    // Release.
-    for (i = 0; i < releaseCurve.size(); i++)
-    {
-        trumpetSound[attackCurve.size() + decayCurve.size() + sustainLength + i] *= releaseCurve[i];
-    }
-
-    // Reverb.
-    std::vector<double> partTrumpet(numInitialSamples);
-    std::vector<double> partTrumpetScaled(numInitialSamples);
-    int j;
-    for (i = 0; i < 40; i++)
-    {
-        for (j = 0; j < numInitialSamples; j++)
+        int currentOffset = sampleOffset + i;
+        if (release)
         {
-            partTrumpetScaled[j] = partTrumpet[j] / ((i + 1) * 1);
+            if (currentOffset < releaseCurve.size())
+            {
+                trumpetSound[i] *= releaseCurve[currentOffset];
+            }
+            else
+            {
+                trumpetSound[i] = 0;
+            }
         }
-        addWave(0 + i * 0.05, partTrumpetScaled, trumpetSound);
+        else
+        {
+            if (currentOffset < attackDecayCurve.size())
+            {
+                trumpetSound[i] *= attackDecayCurve[currentOffset];
+            }
+            else
+            {
+                trumpetSound[i] *= 0.8;
+            }
+        }
     }
-
-    for (i = numInitialSamples; i < numSamples; i++)
-    {
-        trumpetSound[i] = 0;
-    }
-
     return trumpetSound;
 }
 
@@ -138,9 +152,9 @@ double TrumpetGenerator::mapToFrequency(double vibrationFrequency, int bitwiseVa
     return baseFrequency * octaveMultiplier * noteMultiplier;
 }
 
-void TrumpetGenerator::addSinusoidal(double startTime, double seconds, double frequency, double amplitude, std::vector<double> &originalSound)
+void TrumpetGenerator::addSinusoidal(double startTime, double seconds, double frequency, double amplitude, std::vector<double> &originalSound, int sampleOffset)
 {
-    std::vector<double> newWave = generateSinusoidal(amplitude, frequency, seconds);
+    std::vector<double> newWave = generateSinusoidal(amplitude, frequency, seconds, sampleOffset);
     addWave(startTime, newWave, originalSound);
 }
 
@@ -152,11 +166,15 @@ void TrumpetGenerator::addWave(double startTime, std::vector<double> newWave, st
     for (int i = 0; i < numSamples; i++)
     {
         int originalIndex = i + startSamples;
+        if (originalIndex >= originalSound.size())
+        {
+            break;
+        }
         originalSound[originalIndex] += newWave[i];
     }
 }
 
-std::vector<double> TrumpetGenerator::generateSinusoidal(double amplitude, double frequency, double seconds)
+std::vector<double> TrumpetGenerator::generateSinusoidal(double amplitude, double frequency, double seconds, int sampleOffset)
 {
     int length = secondsToSamples(seconds);
     std::vector<double> x(length);
@@ -164,7 +182,7 @@ std::vector<double> TrumpetGenerator::generateSinusoidal(double amplitude, doubl
     int i;
     for (i = 0; i < length; i++)
     {
-        x[i] = amplitude * sin((double)i / SAMPLE_RATE * 2 * M_PI * frequency);
+        x[i] = amplitude * sin((double)(i + sampleOffset) / SAMPLE_RATE * 2 * M_PI * frequency);
     }
 
     double maxAmplitude = 0;
@@ -199,14 +217,22 @@ std::vector<double> TrumpetGenerator::makeLine(double startY, double endY, doubl
     return y;
 }
 
-void TrumpetGenerator::fmmod(std::vector<double> &sound, double frequency, double freqDev)
+void TrumpetGenerator::fmmod(std::vector<double> &sound, double frequency, double freqDev, int sampleOffset)
 {
-    double cumsum = 0;
     for (int i = 0; i < sound.size(); i++)
     {
         cumsum += sound[i];
-        double newValue = 25 * cos(2 * M_PI * (frequency * ((double)i / SAMPLE_RATE) + freqDev * (cumsum / SAMPLE_RATE)));
+        double newValue = 25 * cos(2 * M_PI * (frequency * ((double)(i + sampleOffset) / SAMPLE_RATE) + freqDev * (cumsum / SAMPLE_RATE)));
         sound[i] = newValue;
     }
 }
 
+void TrumpetGenerator::insertVector(std::vector<double>& vector1, std::vector<double> vector2)
+{
+    vector1.insert(vector1.end(), vector2.begin(), vector2.end());
+}
+
+void TrumpetGenerator::resetCumsum()
+{
+    cumsum = 0;
+}

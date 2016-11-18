@@ -43,8 +43,22 @@ void AudioPlayer::start(double frequency, double seconds)
     }
 
     _audio->stop();
-    //QObject::connect(_audio, SIGNAL(notify()), this, SLOT(slot_writeMoreData()));
-    sound = trumpet->generateTrumpet(frequency, seconds);
+
+    int soundBlocks = 43;
+    int releaseBlocks = 5;
+    std::vector<double> totalSound (0);
+    trumpet->resetCumsum();
+    for (int i = 0; i < soundBlocks; i++)
+    {
+        std::vector<double> newSound = trumpet->generateTrumpet(frequency, i * TrumpetGenerator::BLOCK_SIZE, false);
+        trumpet->insertVector(totalSound, newSound);
+    }
+    for (int i = 0; i < releaseBlocks; i++)
+    {
+        std::vector<double> newSound = trumpet->generateTrumpet(frequency, (i + soundBlocks) * TrumpetGenerator::BLOCK_SIZE, true);
+        trumpet->insertVector(totalSound, newSound);
+    }
+    sound = totalSound;
 
     playbackIndex = 0;
     _pAudioIOBuffer = _audio->start();
