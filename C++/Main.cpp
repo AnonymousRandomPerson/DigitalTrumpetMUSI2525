@@ -68,7 +68,7 @@ void pb3_hit_callback (void)
 
 }
 
-const float PERIOD = 440.0 / SAMPLE_RATE;
+const float PERIOD = 1.0 / SAMPLE_RATE;
 const float TWO_PI = 6.28318530717959;
 const float MULTIPLIER = TWO_PI * PERIOD;
 const int SIN_PRECISION = 1024;
@@ -106,7 +106,7 @@ void Sample_timer_interrupt(void)
     }
 }
 
-void recalcBuffer(int offset)
+void recalcBuffer(int offset, float frequency, bool release)
 {
     float curve = 0.8;
     if (offset < 827)
@@ -117,8 +117,20 @@ void recalcBuffer(int offset)
     {
         curve = 1.0 - (offset - 827.0) / 3307.0 * 0.2;
     }
+    else if (release)
+    {
+        if (offset < 2205)
+        {
+            curve = 0.8 - (offset / 2205.0);
+        }
+        else
+        {
+            curve = 0;
+        }
+    }
+    float noteMultiplier = frequency * MULTIPLIER;
     for(int k=0; k<BUFFER_SIZE; k++) {
-        float baseMultiplier = (k + offset) * MULTIPLIER;
+        float baseMultiplier = (k + offset) * noteMultiplier;
         Analog_out_data[k] = sinApprox(baseMultiplier);
         Analog_out_data[k] += sinApprox(baseMultiplier * 2) * 0.7847;
         Analog_out_data[k] += sinApprox(baseMultiplier * 3) * 0.8333;
@@ -164,7 +176,8 @@ int main()
     for(int k=0; k < SIN_PRECISION; k++) {
         sinLookup[k] = sin(TWO_PI * k / float(SIN_PRECISION));
     }
-    recalcBuffer(0);
+    float frequency = 440;
+    recalcBuffer(counter, frequency, false);
     Ticker Sample_Period;
     Sample_Period.attach(&Sample_timer_interrupt, 1.0/(SAMPLE_RATE));
 
@@ -182,7 +195,7 @@ int main()
         {
             needsUpdate = false;
             counter += BUFFER_SIZE;
-            recalcBuffer(counter);
+            recalcBuffer(counter, frequency, false);
         }
        
         switch (pbStatus) {
