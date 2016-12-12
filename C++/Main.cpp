@@ -79,7 +79,7 @@
   {
       // CODE HERE WILL RUN WHEN INTERUPT IS GENERATED
       //0x06
-      pbStatus = pbStatus & 0x14;
+      pbStatus = pbStatus & 0x0E;
 
   }
   //pb2
@@ -87,13 +87,13 @@
   {
       // CODE HERE WILL RUN WHEN INTERUPT IS GENERATED
       //0x05
-      pbStatus = pbStatus & 0x13;
+      pbStatus = pbStatus & 0x0D;
   }
   //pb3 
   void pb3_hit_callback_off (void)
   {
       // CODE HERE WILL RUN WHEN INTERUPT IS GENERATED 0x03
-      pbStatus = pbStatus & 0x11;
+      pbStatus = pbStatus & 0x0B;
   }
   //pb4
   void pb4_hit_callback_off (void)
@@ -234,10 +234,10 @@ int main()
             case 0x01: frequency = 349.2; break; // F
             case 0x02: frequency = 370.0; break; // F#
             case 0x08: frequency = 392; break; // G
-            case 0x14: frequency = 415.3; break; // G#
-            case 0x11: frequency = 440; break; // A
+            case 0x0E: frequency = 415.3; break; // G#
+            case 0x0B: frequency = 440; break; // A
             case 0x09: frequency = 466.2; break; // A#
-            case 0x10: frequency = 493.9; break; // B
+            case 0x0A: frequency = 493.9; break; // B
             default: frequency = 261;
             }
         
